@@ -1,4 +1,4 @@
-utiliser comme ce code mais qui affiche aussi le tmp par mois : import streamlit as st
+ import streamlit as st
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
