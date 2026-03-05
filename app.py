@@ -1,31 +1,38 @@
-import streamlit as st
-import pandas as pd
 import requests
+import pandas as pd
 from bs4 import BeautifulSoup
 
-st.title("TMP Marché Interbancaire BAM")
+def get_tmp_bam(date_recherche):
 
-url = "https://www.bkam.ma/fr/Marches/Principaux-indicateurs/Marche-monetaire/Marche-monetaire-interbancaire"
+    url = "https://www.bkam.ma/fr/Marches/Principaux-indicateurs/Marche-monetaire/Marche-monetaire-interbancaire"
 
-response = requests.get(url)
-soup = BeautifulSoup(response.text, "lxml")
+    # télécharger la page
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "lxml")
 
-table = soup.find("table")
+    # récupérer le tableau
+    table = soup.find("table")
 
-df = pd.read_html(str(table))[0]
+    # transformer en dataframe
+    df = pd.read_html(str(table))[0]
 
-df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
+    # chercher la date
+    ligne = df[df["Date"] == date_recherche]
 
-date_debut = st.date_input("Date début")
-date_fin = st.date_input("Date fin")
+    if not ligne.empty:
+        taux = ligne["Taux Moyen Pondéré"].values[0]
+        print("Date :", date_recherche)
+        print("Taux moyen pondéré :", taux)
+        return taux
+    else:
+        print("Date non trouvée dans la page")
+        return None
 
-if st.button("Afficher les données"):
 
-    df_filtre = df[
-        (df["Date"] >= str(date_debut)) &
-        (df["Date"] <= str(date_fin))
-    ]
+# ======================
+# entrer la date ici
+# ======================
 
-    st.dataframe(df_filtre)
+date = input("Entrer la date (jj/mm/aaaa) : ")
 
-    st.line_chart(df_filtre.set_index("Date")["Taux Moyen Pondéré"])
+get_tmp_bam(date)
